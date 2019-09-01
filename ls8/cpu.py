@@ -2,12 +2,50 @@
 
 import sys
 
+HLT = 0b00000001
+LDI = 0b10000010
+PRN = 0b01000111
+ADD = 0b10100000
+AND = 0b10101000
+CALL = 0b01010000
+CMP = 0b10100111
+DEC = 0b01100110
+DIV = 0b10100011
+INC = 0b01100101
+INT = 0b01010010
+IRET = 0b00010011
+JEQ = 0b01010101
+JGE = 0b01011010
+JGT = 0b01010111
+JLE = 0b01011001
+JLT = 0b01011000
+JMP = 0b01010100
+JNE = 0b01010110
+LD = 0b10000011
+MOD = 0b10100100
+MUL = 0b10100010
+NOP = 0b00000000
+NOT = 0b01101001
+OR = 0b10101010
+POP = 0b01000110
+PRA = 0b01001000
+PUSH = 0b01000101
+RET = 0b00010001
+SHL = 0b10101100
+SHR = 0b10101101
+ST = 0b10000100
+SUB = 0b10100001
+XOR = 0b10101011
+
 class CPU:
     """Main CPU class."""
 
     def __init__(self):
         """Construct a new CPU."""
-        pass
+        self.ram = [0] * 256
+        self.reg = [0] * 8
+        self.pc = 0
+        self.ir = 0
 
     def load(self):
         """Load a program into memory."""
