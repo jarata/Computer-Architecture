@@ -107,7 +107,7 @@ class CPU:
 
     def ldi(self, address, value):
         self.reg[address] = value # sets the value to the register/address
-        self.pc += 3 # becasue LDI takes operand a,b, and op we need to incriment past used values in RAM
+        self.pc += 3 # because LDI takes operand a,b, and op we need to increment past used values in RAM
         
     def prn(self, address):
         print(self.reg[int(address)]) # prints the address
@@ -118,7 +118,7 @@ class CPU:
         running = True
         
         while running:
-            op = self.ram_read(self.pc) # start at beginning of program index 0 also incriment for every command in RAM
+            op = self.ram_read(self.pc) # start at beginning of program index 0 also increment for every command in RAM
             operand_a = self.ram_read(self.pc+1)
             operand_b = self.ram_read(self.pc+2)
             
