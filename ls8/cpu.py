@@ -2,6 +2,7 @@
 
 import sys
 
+# Global Operation Variables
 HLT = 0b00000001
 LDI = 0b10000010
 PRN = 0b01000111
@@ -42,25 +43,25 @@ class CPU:
 
     def __init__(self):
         """Construct a new CPU."""
-        self.ram = [0] * 256
-        self.reg = [0] * 8
+        self.ram = [0] * 255
+        self.reg = [0] * 7
         self.pc = 0
         self.ir = 0
 
     def load(self):
         """Load a program into memory."""
-
+        
         address = 0
 
         # For now, we've just hardcoded a program:
-
+        
         program = [
             # From print8.ls8
-            0b10000010, # LDI R0,8
-            0b00000000,
-            0b00001000,
-            0b01000111, # PRN R0
-            0b00000000,
+            0b10000010, # LDI R0,8  def ldi(reg, value):   address 0
+            0b00000000, # sets register at                  address 1
+            0b00001000, # sets the value
+            0b01000111, # PRN R0 def prn(reg):
+            0b00000000, # address of register which holds the value called
             0b00000001, # HLT
         ]
 
@@ -98,6 +99,33 @@ class CPU:
 
         print()
 
+    def ram_read(self, address):
+        return self.ram[address]
+
+    def ram_write(self, address, value):
+        self.ram[address] = value
+
+    def ldi(self, address, value):
+        self.reg[address] = value # sets the value to the register/address
+        self.pc += 3 # becasue LDI takes operand a,b, and op we need to incriment past used values in RAM
+        
+    def prn(self, address):
+        print(self.reg[int(address)]) # prints the address
+        self.pc += 2 # only takes in operand a and operation "op"
+        
     def run(self):
         """Run the CPU."""
-        pass
+        running = True
+        
+        while running:
+            op = self.ram_read(self.pc) # start at beginning of program index 0 also incriment for every command in RAM
+            operand_a = self.ram_read(self.pc+1)
+            operand_b = self.ram_read(self.pc+2)
+            
+            if op == LDI:
+                self.ldi(operand_a, operand_b)
+            elif op == PRN:
+                self.prn(operand_a)
+            elif op == HLT:
+                running = False
+
