@@ -44,7 +44,7 @@ class CPU:
     def __init__(self):
         """Construct a new CPU."""
         self.ram = [0] * 255
-        self.reg = [0] * 7
+        self.reg = [0] * 8
         self.pc = 0
         self.ir = 0
 
@@ -134,6 +134,20 @@ class CPU:
         self.reg[rega] = sum
         self.pc += 3
         
+    def push(self, address):
+        SP = self.reg[7]
+        
+        self.reg[address] = (SP - 1)
+        # 1. Decrement the `SP`.
+        # 2. Copy the value in the given register to the address pointed to by `SP`.
+    
+    def pop(self, address):
+        SP = self.reg[7]
+        
+        self.reg[address] = (SP + 1)
+        # 1. Copy the value from the address pointed to by `SP` to the given register.
+        # 2. Increment `SP`.
+        
     def run(self):
         """Run the CPU."""
         running = True
@@ -149,6 +163,10 @@ class CPU:
                 self.prn(operand_a)
             elif op == MUL:
                 self.mul(operand_a, operand_b)
+            elif op == POP:
+                self.pop(operand_a)
+            elif op == PUSH:
+                self.push(operand_b)
             elif op == HLT:
                 running = False
 
