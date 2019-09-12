@@ -55,20 +55,36 @@ class CPU:
 
         # For now, we've just hardcoded a program:
         
-        program = [
-            # From print8.ls8
-            0b10000010, # LDI R0,8  def ldi(reg, value):   address 0
-            0b00000000, # sets register at                  address 1
-            0b00001000, # sets the value
-            0b01000111, # PRN R0 def prn(reg):
-            0b00000000, # address of register which holds the value called
-            0b00000001, # HLT
-        ]
+        # program = [
+        #     # From print8.ls8
+        #     0b10000010, # LDI R0,8  def ldi(reg, value):   address 0
+        #     0b00000000, # sets register at                  address 1
+        #     0b00001000, # sets the value
+        #     0b01000111, # PRN R0 def prn(reg):
+        #     0b00000000, # address of register which holds the value called
+        #     0b00000001, # HLT
+        # ]
+        #
+        # for instruction in program:
+        #     self.ram[address] = instruction
+        #     address += 1
 
-        for instruction in program:
-            self.ram[address] = instruction
-            address += 1
+        try:
+            with open(sys.argv[1]) as file:
+                for line in file:
+                    comment_split = line.split('#')
+                    possible_number = comment_split[0]
+                    if possible_number == '':  # if line is empty
+                        continue
+                    first_bit = possible_number[0]  # check index for first number
+                    if first_bit == '1' or first_bit == '0':  # does equal 1 or 0
+                        instruction = int(possible_number[:8], 2)  #
+                        self.ram[address] = instruction  #
+                        address += 1  #
 
+        except FileNotFoundError:
+            print(f'Unable to find {sys.argv[1]}, please check the name and try again')
+            sys.exit(2)
 
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
@@ -112,6 +128,11 @@ class CPU:
     def prn(self, address):
         print(self.reg[int(address)]) # prints the address
         self.pc += 2 # only takes in operand a and operation "op"
+    
+    def mul(self, rega, regb):
+        sum = self.reg[rega] * self.reg[regb]
+        self.reg[rega] = sum
+        self.pc += 3
         
     def run(self):
         """Run the CPU."""
@@ -126,6 +147,8 @@ class CPU:
                 self.ldi(operand_a, operand_b)
             elif op == PRN:
                 self.prn(operand_a)
+            elif op == MUL:
+                self.mul(operand_a, operand_b)
             elif op == HLT:
                 running = False
 
