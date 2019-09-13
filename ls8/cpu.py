@@ -37,6 +37,8 @@ SHR = 0b10101101
 ST = 0b10000100
 SUB = 0b10100001
 XOR = 0b10101011
+# Globals
+SP = 7
 
 class CPU:
     """Main CPU class."""
@@ -134,20 +136,25 @@ class CPU:
         self.reg[rega] = sum
         self.pc += 3
         
-    def push(self, address):
-        SP = self.reg[7]
-        
-        self.reg[address] = (SP - 1)
+    def push(self, register):
+        self.reg[SP] -= 1
         # 1. Decrement the `SP`.
+        value = self.ram_read(register)
+        # print("Value in Push")
+        self.ram_write(SP, value)
         # 2. Copy the value in the given register to the address pointed to by `SP`.
+        self.pc += 2
     
-    def pop(self, address):
-        SP = self.reg[7]
-        
-        self.reg[address] = (SP + 1)
-        # 1. Copy the value from the address pointed to by `SP` to the given register.
+    def pop(self, register):
+        value = self.ram_read(SP)
+        # 1. Copy the value from the address pointed to by `SP` to the given "PASTE" register.
+        self.reg[register] = value # given register
+        # print("Value in Pop")
+        self.reg[SP] += 1
         # 2. Increment `SP`.
-        
+        self.pc += 2
+        return value
+
     def run(self):
         """Run the CPU."""
         running = True
@@ -166,7 +173,8 @@ class CPU:
             elif op == POP:
                 self.pop(operand_a)
             elif op == PUSH:
-                self.push(operand_b)
+                self.push(operand_a)
             elif op == HLT:
                 running = False
+                
 
