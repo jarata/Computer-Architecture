@@ -49,6 +49,7 @@ class CPU:
         self.reg = [0] * 8
         self.pc = 0
         self.ir = 0
+        self.running = True
 
     def load(self):
         """Load a program into memory."""
@@ -139,27 +140,23 @@ class CPU:
     def push(self, register):
         self.reg[SP] -= 1
         # 1. Decrement the `SP`.
-        value = self.ram_read(register)
-        # print("Value in Push")
-        self.ram_write(SP, value)
+        value = self.reg[register]
+        self.ram_write(self.reg[SP], value)
         # 2. Copy the value in the given register to the address pointed to by `SP`.
         self.pc += 2
     
     def pop(self, register):
-        value = self.ram_read(SP)
+        value = self.ram_read(self.reg[SP])
         # 1. Copy the value from the address pointed to by `SP` to the given "PASTE" register.
         self.reg[register] = value # given register
-        # print("Value in Pop")
+        self.ram_write(self.reg[SP], 0) # sets the previous stack address to 0
         self.reg[SP] += 1
         # 2. Increment `SP`.
         self.pc += 2
-        return value
 
     def run(self):
         """Run the CPU."""
-        running = True
-        
-        while running:
+        while self.running:
             op = self.ram_read(self.pc) # start at beginning of program index 0 also increment for every command in RAM
             operand_a = self.ram_read(self.pc+1)
             operand_b = self.ram_read(self.pc+2)
@@ -176,5 +173,3 @@ class CPU:
                 self.push(operand_a)
             elif op == HLT:
                 running = False
-                
-
