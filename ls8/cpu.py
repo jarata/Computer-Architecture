@@ -50,6 +50,16 @@ class CPU:
         self.pc = 0
         self.ir = 0
         self.running = True
+        self.op = {
+            LDI: self.ldi,
+            PRN: self.prn,
+            HLT: self.hlt,
+            POP: self.pop,
+            PUSH: self.push,
+            MUL: self.mul,
+            CALL: self.call,
+            RET: self.ret,
+        }
 
     def load(self):
         """Load a program into memory."""
@@ -154,22 +164,37 @@ class CPU:
         # 2. Increment `SP`.
         self.pc += 2
 
+    def call(self, register):
+        pass
+        # The address of the instruction directly after CALL is pushed onto the stack.
+        # This allows us to return to where we left off when the subroutine finishes executing.
+        #
+        # The PC is set to the address stored in the given register. We jump to that location
+        # in RAM and execute the first instruction in the subroutine. The PC can move forward
+
+    def ret(self):
+        pass
+        # Pop the value from the top of the stack and store it in the PC.
+
+    def hlt(self):
+        self.running = False
+
     def run(self):
         """Run the CPU."""
         while self.running:
-            op = self.ram_read(self.pc) # start at beginning of program index 0 also increment for every command in RAM
+            opcode = self.ram_read(self.pc) # start at beginning of program index 0 also increment for every command in RAM
             operand_a = self.ram_read(self.pc+1)
             operand_b = self.ram_read(self.pc+2)
             
-            if op == LDI:
+            if opcode == LDI:
                 self.ldi(operand_a, operand_b)
-            elif op == PRN:
+            elif opcode == PRN:
                 self.prn(operand_a)
-            elif op == MUL:
+            elif opcode == MUL:
                 self.mul(operand_a, operand_b)
-            elif op == POP:
+            elif opcode == POP:
                 self.pop(operand_a)
-            elif op == PUSH:
+            elif opcode == PUSH:
                 self.push(operand_a)
-            elif op == HLT:
+            elif opcode == HLT:
                 running = False
