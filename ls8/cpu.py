@@ -3,17 +3,15 @@
 import sys
 
 # Global Operation Variables
-operations = {
-    0b00000001: "HLT",
-    0b10000010: "LDI",
-    0b01000111: "PRN",
-    0b10100010: "MUL",
-    0b01000110: "POP",
-    0b01000101: "PUSH",
-    0b01010000: "CALL",
-    0b00010001: "RET"
-}
-
+HLT = 0b00000001
+LDI = 0b10000010
+PRN = 0b01000111
+MUL = 0b10100010
+ADD = 0b10100000
+PUSH = 0b01000101
+POP = 0b01000110
+CALL = 0b01010000
+RET = 0b00010001
 ADD = 0b10100000
 AND = 0b10101000
 CMP = 0b10100111
@@ -54,14 +52,14 @@ class CPU:
         self.ir = 0
         self.running = True
         self.op = {
-            operations[0b10000010]: self.ldi,
-            operations[0b01000111]: self.prn,
-            operations[0b00000001]: self.hlt,
-            operations[0b01000110]: self.pop,
-            operations[0b01000101]: self.push,
-            operations[0b10100010]: self.mul,
-            operations[0b01010000]: self.call,
-            operations[0b00010001]: self.ret,
+            LDI: self.ldi,
+            PRN: self.prn,
+            HLT: self.hlt,
+            POP: self.pop,
+            PUSH: self.push,
+            MUL: self.mul,
+            CALL: self.call,
+            RET: self.ret,
         }
 
     def load(self):
@@ -161,6 +159,11 @@ class CPU:
         self.reg[SP] -= 1
         self.ram_write(self.reg[SP], value)
     
+    def _pop(self):
+        value = self.ram_read(self.reg[SP])
+        self.reg[SP] += 1
+        return value
+        
     def pop(self, register):
         value = self.ram_read(self.reg[SP])
         # 1. Copy the value from the address pointed to by `SP` to the given "PASTE" register.
@@ -170,10 +173,9 @@ class CPU:
         # 2. Increment `SP`.
         # self.pc += 2
 
-    def call(self, register):
+    def call(self, operand_a, operand_b):
         self._push(self.pc + 2)
-        
-        self.pc = self.reg[register]
+        self.pc = self.reg[operand_a]
         
         # The address of the instruction directly after CALL is pushed onto the stack.
         # This allows us to return to where we left off when the subroutine finishes executing.
@@ -183,9 +185,9 @@ class CPU:
 
     def ret(self):
         # Pop the value from the top of the stack and store it in the PC.
-        value = self.ram_read(self.reg[SP])
-        self.pop(value)
-        self.pc = value
+        # value = self.ram_read(self.reg[SP])
+        # self.pop(value)
+        self.pc = self._pop()
         
     def hlt(self):
         self.running = False
@@ -199,17 +201,18 @@ class CPU:
             op_size = opcode >> 6 # AA to see how many operands
             op_set_pc = (opcode >> 4) & 1 == 1 # C to see if PC is flagged to increase
             
-            if self.op[opcode]:
-                if op_size == 0: # function with 0 args
-                    self.op[opcode]()
-                elif op_size == 1: # function with 1 args
-                    self.op[opcode](operand_a)
-                elif op_size == 2: # function with 2 args
-                    self.op[opcode](operand_a, operand_b)
+            if opcode in self.op:
+                self.op[opcode](operand_a, operand_b)
+                # if op_size == 0: # function with 0 args
+                #     self.op[opcode]()
+                # elif op_size == 1: # function with 1 args
+                #     self.op[opcode](operand_a, operand_b)
+                # elif op_size == 2: # function with 2 args
+                #     self.op[opcode](operand_a, operand_b)
             else:
                 print("OP code doesnt exist")
             if not op_set_pc:
-                self.pc += 1 + op_size # moves PC 1 + (# of operands)
+                self.pc += op_size # moves PC 1 + (# of operands)
 
             # if opcode == LDI:
             #     self.ldi(operand_a, operand_b)
